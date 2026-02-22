@@ -1,0 +1,5 @@
+node_modules
+dist
+# .env removed to allow pushing environment variables as requested
+.vercel
+.env*.local
