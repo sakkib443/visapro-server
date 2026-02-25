@@ -11,7 +11,7 @@ import { Model, Types } from 'mongoose';
  * seller - Can upload and sell products/courses
  * buyer - Purchases products and enrolls in courses
  */
-export type TUserRole = 'admin' | 'seller' | 'buyer';
+export type TUserRole = 'admin' | 'user';
 
 /**
  * User Status Types
@@ -59,22 +59,22 @@ export interface ISellerProfile {
   // Verification & Status
   isVerified: boolean;               // Admin verified seller
   verifiedAt?: Date;                 // Verification date
-  
+
   // Statistics (auto-updated)
   rating: number;                    // Average rating (1-5)
   totalSales: number;                // Total products/courses sold
   totalEarnings: number;             // Total earnings in BDT
   totalProducts: number;             // Total products listed
   totalCourses: number;              // Total courses created
-  
+
   // Commission & Payout
   commissionRate: number;            // Platform commission % (default 20%)
   pendingEarnings: number;           // Pending payout amount
   withdrawnEarnings: number;         // Total withdrawn amount
-  
+
   // Permissions (Admin controlled)
   permissions: ISellerPermissions;
-  
+
   // Payout Information
   payoutMethod?: 'bkash' | 'nagad' | 'bank' | 'paypal';
   payoutDetails?: {

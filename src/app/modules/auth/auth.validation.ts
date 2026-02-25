@@ -44,8 +44,8 @@ export const registerValidation = z.object({
       })
       .min(10, 'Phone number must be at least 10 digits'),
 
-    // Only buyer can register publicly, seller/admin created by admin
-    role: z.literal('buyer').optional().default('buyer'),
+    // Only user can register publicly, admin is created manually
+    role: z.literal('user').optional().default('user'),
   }),
 });
 

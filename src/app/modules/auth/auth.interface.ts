@@ -22,7 +22,7 @@ export interface IRegisterPayload {
     firstName: string;
     lastName: string;
     phone: string;
-    role?: 'student';  // Only student can register, admin is created manually
+    role?: 'user';  // Only user can register, admin is created manually
 }
 
 /**
@@ -79,7 +79,7 @@ export interface IResetPasswordPayload {
 export interface IJwtPayload {
     userId: string;
     email: string;
-    role: 'admin' | 'superadmin' | 'mentor' | 'seller' | 'buyer' | 'user' | 'student';
+    role: 'admin' | 'user';
     iat?: number;
     exp?: number;
 }

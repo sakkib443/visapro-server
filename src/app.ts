@@ -18,6 +18,8 @@ import { AuthRoutes } from './app/modules/auth/auth.routes';
 import { UserRoutes } from './app/modules/user/user.routes';
 import { uploadRoutes } from './app/modules/upload/upload.routes';
 import { BlogRoutes } from './app/modules/blog/blog.routes';
+import { VisaCategoryRoutes } from './app/modules/visaCategory/visaCategory.routes';
+import { CountryRoutes } from './app/modules/country/country.routes';
 
 // ==================== App Initialization ====================
 const app: Application = express();
@@ -90,6 +92,12 @@ app.use('/api/upload', uploadRoutes);
 
 // Blog routes (blog posts and comments)
 app.use('/api/blogs', BlogRoutes);
+
+// Visa Category routes
+app.use('/api/visa-categories', VisaCategoryRoutes);
+
+// Country routes
+app.use('/api/countries', CountryRoutes);
 
 // ==================== Error Handling ====================
 // 404 Not Found handler (must be after all routes)
