@@ -10,7 +10,7 @@ import AppError from '../utils/AppError';
 import { User } from '../modules/user/user.model';
 
 // Role types - Updated for marketplace
-type TRole = 'admin' | 'superadmin' | 'mentor' | 'seller' | 'buyer' | 'user' | 'student';
+type TRole = 'admin' | 'user';
 
 /**
  * Extended Request interface with user data
@@ -69,8 +69,8 @@ export const authMiddleware = async (
     // Special handling for superadmin login from environment variables
     const SUPER_ADMIN_ID = '000000000000000000000001';
 
-    if (decoded.userId === SUPER_ADMIN_ID && decoded.role === 'superadmin') {
-      // Superadmin from .env - skip database check
+    if (decoded.userId === SUPER_ADMIN_ID && decoded.role === 'admin') {
+      // Admin from .env - skip database check
       req.user = {
         ...decoded,
         _id: decoded.userId,

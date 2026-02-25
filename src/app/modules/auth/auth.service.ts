@@ -103,7 +103,7 @@ const AuthService = {
             const jwtPayload: IJwtPayload = {
                 userId: superAdminId,
                 email: adminEmail,
-                role: 'superadmin',
+                role: 'admin',
             };
 
             const tokens = this.generateTokens(jwtPayload);
@@ -114,7 +114,7 @@ const AuthService = {
                     email: adminEmail,
                     firstName: 'Super',
                     lastName: 'Admin',
-                    role: 'superadmin',
+                    role: 'admin',
                     avatar: '',
                 },
                 tokens,

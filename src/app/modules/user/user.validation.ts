@@ -49,7 +49,7 @@ export const createUserValidation = z.object({
     avatar: z.string().url('Avatar must be a valid URL').optional(),
     coverImage: z.string().url('Cover image must be a valid URL').optional(),
 
-    role: z.enum(['admin', 'seller', 'buyer']).optional().default('buyer'),
+    role: z.enum(['admin', 'user']).optional().default('user'),
   }),
 });
 
@@ -107,7 +107,7 @@ export const adminUpdateUserValidation = z.object({
   body: z.object({
     firstName: z.string().max(50).optional(),
     lastName: z.string().max(50).optional(),
-    role: z.enum(['admin', 'seller', 'buyer']).optional(),
+    role: z.enum(['admin', 'user']).optional(),
     status: z.enum(['active', 'blocked', 'pending']).optional(),
     isEmailVerified: z.boolean().optional(),
   }),
@@ -156,7 +156,7 @@ export const userQueryValidation = z.object({
     page: z.string().optional(),
     limit: z.string().optional(),
     searchTerm: z.string().optional(),
-    role: z.enum(['admin', 'seller', 'buyer']).optional(),
+    role: z.enum(['admin', 'user']).optional(),
     status: z.enum(['active', 'blocked', 'pending']).optional(),
     sortBy: z.string().optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
