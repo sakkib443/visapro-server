@@ -22,6 +22,8 @@ import { VisaCategoryRoutes } from './app/modules/visaCategory/visaCategory.rout
 import { CountryRoutes } from './app/modules/country/country.routes';
 import { TourRoutes } from './app/modules/tour/tour.routes';
 import { HajjUmrahRoutes } from './app/modules/hajjUmrah/hajjUmrah.routes';
+import { HotelRoutes } from './app/modules/hotel/hotel.routes';
+import { VisaDocumentRoutes } from './app/modules/visaDocument/visaDocument.routes';
 
 // ==================== App Initialization ====================
 const app: Application = express();
@@ -106,6 +108,12 @@ app.use('/api/tours', TourRoutes);
 
 // Hajj & Umrah routes
 app.use('/api/hajj-umrah', HajjUmrahRoutes);
+
+// Hotel routes
+app.use('/api/hotels', HotelRoutes);
+
+// Visa Document routes (user document delivery)
+app.use('/api/visa-documents', VisaDocumentRoutes);
 
 // ==================== Error Handling ====================
 // 404 Not Found handler (must be after all routes)
