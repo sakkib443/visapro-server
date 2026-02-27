@@ -50,7 +50,6 @@ const sellerProfileSchema = new Schema(
     storeSlug: {
       type: String,
       required: true,
-      unique: true,
       lowercase: true,
       trim: true,
     },
@@ -312,7 +311,7 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
 // Search performance বাড়ানোর জন্য indexes
 userSchema.index({ email: 1 });
 userSchema.index({ role: 1, status: 1 });
-userSchema.index({ 'sellerProfile.storeSlug': 1 });
+userSchema.index({ 'sellerProfile.storeSlug': 1 }, { sparse: true });
 userSchema.index({ firstName: 'text', lastName: 'text', email: 'text' });
 
 // ==================== Virtual Fields ====================
