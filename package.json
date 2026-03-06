@@ -37,9 +37,10 @@
     "jsonwebtoken": "^9.0.2",
     "lint-staged": "^15.1.0",
     "mongoose": "^8.0.1",
-    "multer": "^2.0.2",
+    "multer": "^2.1.0",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.12",
+    "pdf-parse": "^1.1.1",
     "stripe": "^20.2.0",
     "zod": "^3.22.4"
   },
