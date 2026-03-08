@@ -4,12 +4,38 @@
 // ===================================================================
 
 import express from 'express';
+import multer from 'multer';
 import { VisaDocumentController } from './visaDocument.controller';
 import { VisaDocumentValidation } from './visaDocument.validation';
 import { authMiddleware, authorizeRoles } from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 
 const router = express.Router();
+
+// Multer — memory storage for AI extraction (no disk write)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max
+    fileFilter: (_req, file, cb) => {
+        const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+        if (allowed.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF, JPG, PNG, WEBP files are allowed'));
+        }
+    },
+});
+
+// ==================== AI Extract Route ====================
+
+// Extract data from PDF/Image using Gemini AI
+router.post(
+    '/extract',
+    authMiddleware,
+    authorizeRoles('admin'),
+    upload.single('document'),
+    VisaDocumentController.extractDocument
+);
 
 // ==================== User Routes (authenticated) ====================
 
