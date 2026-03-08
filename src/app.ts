@@ -119,6 +119,14 @@ app.use('/api/visa-documents', VisaDocumentRoutes);
 // PDF Extract routes (admin ticket generator)
 app.use('/api/pdf-extract', PdfExtractRoutes);
 
+// Ticket CRUD routes (save/edit/list tickets)
+import { TicketRoutes } from './app/modules/ticket/ticket.routes';
+app.use('/api/tickets', TicketRoutes);
+
+// Document Entry CRUD routes (visa/travel docs)
+import { DocEntryRoutes } from './app/modules/docEntry/docEntry.routes';
+app.use('/api/doc-entries', DocEntryRoutes);
+
 // ==================== Error Handling ====================
 // 404 Not Found handler (must be after all routes)
 app.use(notFoundHandler);

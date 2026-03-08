@@ -6,6 +6,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { VisaDocumentService } from './visaDocument.service';
 import { IVisaDocumentFilters } from './visaDocument.interface';
+import { extractDocumentData } from './visaDocument.extract';
 
 /**
  * Create a new visa document (admin only)
@@ -132,6 +133,46 @@ const deleteVisaDocument = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
+/**
+ * Extract data from uploaded PDF or Image using Gemini AI
+ * POST /api/visa-documents/extract
+ */
+const extractDocument = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const file = (req as any).file;
+        if (!file) {
+            res.status(400).json({ success: false, message: 'No file uploaded' });
+            return;
+        }
+
+        const groqKey = (process.env.GROQ_API_KEY || '').trim();
+        if (!groqKey || groqKey === 'your_groq_api_key_here') {
+            res.status(503).json({
+                success: false,
+                message: 'Groq API key not configured. Please add GROQ_API_KEY to .env file. Get free key at console.groq.com',
+            });
+            return;
+        }
+
+        const extracted = await extractDocumentData(
+            file.buffer,
+            file.mimetype,
+            file.originalname
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Document extracted successfully',
+            data: extracted,
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Extraction failed',
+        });
+    }
+};
+
 export const VisaDocumentController = {
     createVisaDocument,
     getAllVisaDocuments,
@@ -139,4 +180,5 @@ export const VisaDocumentController = {
     getVisaDocumentById,
     updateVisaDocument,
     deleteVisaDocument,
+    extractDocument,
 };
