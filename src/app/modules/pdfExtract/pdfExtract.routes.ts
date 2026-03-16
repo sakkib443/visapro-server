@@ -1,6 +1,6 @@
 // ===================================================================
 // VisaPro - PDF Extract Route (Groq AI powered)
-// Flight ticket / visa document থেকে সব তথ্য extract করে
+// Flight ticket document theke 44 fields extract kore frontend format e
 // ===================================================================
 
 import express from 'express';
@@ -23,80 +23,75 @@ const upload = multer({
     },
 });
 
-const ALL_DOCS_PROMPT = `You are an expert travel document data extractor for a visa consultancy system.
-Analyze this document carefully. It could be a visa sticker, passport page, flight ticket, hotel booking, or any travel document.
+// Ticket-specific prompt that returns EXACTLY the frontend format
+const TICKET_PROMPT = `You are an expert airline e-ticket data extractor. 
+Extract ALL visible information from this flight ticket/itinerary document.
 
-Extract ALL visible information and return ONLY a valid JSON object. Use empty string "" for fields not found.
+Return ONLY a valid JSON object in this EXACT structure. Use "" for missing fields.
 
 {
-  "documentType": "visa | flight_ticket | passport | hotel_booking | itinerary | other",
-  "documentNumber": "Main reference number (visa no / booking ref / passport no)",
-
-  "fullNameEn": "Full name in English (e.g. MR GOLAM MONZUR AHAMED)",
-  "fullNameBn": "Full name in Bengali if present",
-  "dateOfBirth": "Date of birth",
-  "placeOfBirth": "Place of birth",
-  "gender": "Male or Female",
-  "nationality": "Nationality",
-  "religion": "Religion if shown",
-  "maritalStatus": "Marital status if shown",
-  "occupation": "Occupation / profession",
-  "fatherName": "Father's name",
-  "motherName": "Mother's name",
-
-  "passportNo": "Passport number",
-  "passportIssueDate": "Passport issue date",
-  "passportExpiryDate": "Passport expiry date",
-  "passportIssuePlace": "Passport issued place",
-
-  "visaType": "Tourist / Student / Business / Work / Medical / Visit / Transit / Spouse/Family",
-  "visaNumber": "Visa number",
-  "country": "Destination country",
-  "embassyName": "Embassy or consulate name",
-  "visaIssueDate": "Visa issue date",
-  "visaValidFrom": "Visa valid from date",
-  "visaExpiryDate": "Visa expiry date",
-  "entryType": "Single / Double / Multiple",
-  "durationOfStay": "Allowed duration e.g. 30 Days",
-  "numberOfEntries": "Number of entries allowed",
-  "purposeOfVisit": "Purpose of visit",
-
-  "airlineName": "Airline name e.g. Emirates",
-  "flightNumber": "Flight number e.g. EK 585",
-  "bookingRef": "Booking reference",
-  "airlinePnr": "Airline PNR",
-  "pnrCode": "PNR code",
-  "fromCity": "Origin city or airport code e.g. DAC",
-  "toCity": "Destination city or airport code e.g. DXB",
-  "departureDate": "Departure date",
-  "departureTime": "Departure time",
-  "arrivalDate": "Arrival date",
-  "arrivalTime": "Arrival time",
-  "seatClass": "Seat class e.g. Economy",
-  "baggageAllowance": "Baggage e.g. 1PC (23KG)",
-  "transitInfo": "Transit information",
-  "grandTotal": "Total fare amount",
-
-  "hotelName": "Hotel name",
-  "checkInDate": "Check-in date",
-  "checkOutDate": "Check-out date",
-  "roomType": "Room type",
-  "hotelAddress": "Hotel address",
-
-  "phone": "Phone number",
-  "email": "Email address",
-  "address": "Home or office address",
-  "ticketPrice": "Ticket or visa price",
-  "visaFee": "Visa fee",
-  "currency": "Currency code e.g. BDT",
-
-  "remarks": "Any other important information, conditions, or restrictions"
+  "bookingRef": "Booking reference number",
+  "airlinePnr": "Airline PNR code",
+  "dateOfIssue": "Date of issue (e.g. 19-Sep-2025)",
+  "status": "Confirmed or Pending or Cancelled",
+  "grandTotal": "Grand total fare amount with commas (e.g. 4,10,367)",
+  "passengers": [
+    {
+      "name": "Full passenger name with title (e.g. MR GOLAM MONZUR AHAMED)",
+      "type": "ADT or CHD or INF",
+      "gender": "MALE or FEMALE",
+      "passportNo": "Passport number",
+      "cabin": "Cabin baggage (e.g. 7 KG)",
+      "checked": "Checked baggage (e.g. 1PC (23KG))",
+      "eTicket": "E-ticket number"
+    }
+  ],
+  "flights": [
+    {
+      "airline": "Airline name (e.g. Emirates)",
+      "flightNo": "Flight number (e.g. EK 585)",
+      "from": "Departure IATA code (e.g. DAC)",
+      "fromAirport": "Full departure airport name",
+      "to": "Arrival IATA code (e.g. DXB)",
+      "toAirport": "Full arrival airport name",
+      "departDay": "Departure day (e.g. FRI)",
+      "departDate": "Departure date (e.g. 29 May 2026)",
+      "departTime": "Departure time (e.g. 01:40)",
+      "arriveDay": "Arrival day (e.g. FRI)",
+      "arriveDate": "Arrival date (e.g. 29 May 2026)",
+      "arriveTime": "Arrival time (e.g. 04:30)",
+      "classInfo": "Class info (e.g. Economy (T))",
+      "refund": "Refund policy (e.g. Non-Refundable)",
+      "route": "Route type (e.g. One-way or Round-trip)",
+      "duration": "Flight duration (e.g. 4h 50m)",
+      "personalItem": "Personal item allowed (e.g. Laptop Bag)",
+      "selfTransfer": "Self transfer required? (No or Yes)",
+      "terminalChange": "Terminal change? (No or Yes)",
+      "codeshare": "Codeshare flight? (No or Yes)",
+      "ssrRemarks": "SSR remarks (e.g. No)",
+      "transitInfo": "Transit details if connecting (e.g. Transit in Dubai (DXB) 4h 15m)"
+    }
+  ],
+  "fares": [
+    {
+      "type": "ADT or CHD or INF",
+      "baseFare": "Base fare with commas (e.g. 1,23,093)",
+      "tax": "Tax amount with commas",
+      "ait": "AIT amount",
+      "grossFare": "Gross fare with commas",
+      "pax": "Number of passengers of this type",
+      "total": "Total for this type with commas"
+    }
+  ]
 }
 
 RULES:
-- Extract EVERYTHING you can see in the document
-- Return ONLY raw JSON, NO markdown, NO explanation
-- For multiple passengers in flight ticket, use the FIRST passenger's details`;
+- Extract EVERY passenger, EVERY flight segment, and EVERY fare type separately
+- For multiple flights (connecting), create separate objects in flights array
+- For multiple passenger types (ADT, CHD, INF), create separate fare objects
+- Look for ALL details: baggage, class, refund policy, duration, transit info
+- Return ONLY raw JSON, NO markdown, NO explanation, NO code block
+- If a field is not found, use empty string ""`;
 
 
 // POST /api/pdf-extract
@@ -116,10 +111,9 @@ router.post('/', upload.single('pdf'), async (req: any, res: any) => {
             console.log(`📄 PDF: ${pdfData.numpages} pages, ${extractedText.length} chars`);
         }
 
-        // Use Groq AI for structured extraction
+        // Check Groq API key
         const apiKey = (process.env.GROQ_API_KEY || '').trim();
         if (!apiKey || apiKey === 'your_groq_api_key_here') {
-            // Fallback: return raw text only
             return res.status(200).json({
                 success: true,
                 aiParsed: false,
@@ -128,21 +122,20 @@ router.post('/', upload.single('pdf'), async (req: any, res: any) => {
         }
 
         const groq = new Groq({ apiKey });
-
         let aiResult: any = {};
 
         if (isPdf) {
-            // PDF: text-based extraction
+            // PDF: text-based extraction with LLaMA
             const completion = await groq.chat.completions.create({
                 model: 'llama-3.3-70b-versatile',
                 messages: [
                     {
                         role: 'user',
-                        content: `${ALL_DOCS_PROMPT}\n\nDocument text:\n---\n${extractedText.slice(0, 8000)}\n---`,
+                        content: `${TICKET_PROMPT}\n\nDocument text:\n---\n${extractedText.slice(0, 8000)}\n---`,
                     },
                 ],
                 temperature: 0.1,
-                max_tokens: 2000,
+                max_tokens: 3000,
             });
 
             const text = completion.choices[0]?.message?.content?.trim() || '{}';
@@ -150,7 +143,7 @@ router.post('/', upload.single('pdf'), async (req: any, res: any) => {
             const end = text.lastIndexOf('}');
             aiResult = JSON.parse(start !== -1 ? text.slice(start, end + 1) : '{}');
         } else {
-            // Image: vision model
+            // Image: vision model for scanned tickets
             const base64 = file.buffer.toString('base64');
             const dataUrl = `data:${file.mimetype};base64,${base64}`;
 
@@ -160,13 +153,13 @@ router.post('/', upload.single('pdf'), async (req: any, res: any) => {
                     {
                         role: 'user',
                         content: [
-                            { type: 'text', text: ALL_DOCS_PROMPT },
+                            { type: 'text', text: TICKET_PROMPT },
                             { type: 'image_url', image_url: { url: dataUrl } },
                         ] as any,
                     },
                 ],
                 temperature: 0.1,
-                max_tokens: 2000,
+                max_tokens: 3000,
             });
 
             const text = completion.choices[0]?.message?.content?.trim() || '{}';
@@ -175,15 +168,21 @@ router.post('/', upload.single('pdf'), async (req: any, res: any) => {
             aiResult = JSON.parse(start !== -1 ? text.slice(start, end + 1) : '{}');
         }
 
-        console.log('✅ AI extraction complete:', JSON.stringify(aiResult).substring(0, 100));
+        // Ensure arrays exist
+        if (!Array.isArray(aiResult.passengers)) aiResult.passengers = [];
+        if (!Array.isArray(aiResult.flights)) aiResult.flights = [];
+        if (!Array.isArray(aiResult.fares)) aiResult.fares = [];
+
+        console.log('✅ AI ticket extraction complete:');
+        console.log(`   Passengers: ${aiResult.passengers.length}`);
+        console.log(`   Flights: ${aiResult.flights.length}`);
+        console.log(`   Fares: ${aiResult.fares.length}`);
+        console.log(`   Booking: ${aiResult.bookingRef || 'N/A'}`);
 
         return res.status(200).json({
             success: true,
             aiParsed: true,
-            data: {
-                ...aiResult,
-                text: extractedText, // raw text also available
-            },
+            data: aiResult,
         });
     } catch (error: any) {
         console.error('❌ Extract error:', error.message);

@@ -30,6 +30,7 @@ const flightSchema = new Schema({
     personalItem: { type: String, default: 'Laptop Bag' },
     selfTransfer: { type: String, default: 'No' },
     terminalChange: { type: String, default: 'No' },
+    codeshare: { type: String, default: 'No' },
     ssrRemarks: { type: String, default: 'No' },
     transitInfo: { type: String, default: '' },
 }, { _id: false });
