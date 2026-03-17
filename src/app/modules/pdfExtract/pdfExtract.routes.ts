@@ -88,6 +88,7 @@ Return ONLY a valid JSON object in this EXACT structure. Use "" for missing fiel
 RULES:
 - Extract EVERY passenger, EVERY flight segment, and EVERY fare type separately
 - For multiple flights (connecting), create separate objects in flights array
+- IMPORTANT: For EACH flight segment, fill ALL fields including classInfo, refund, route, duration, personalItem, selfTransfer, terminalChange, codeshare, ssrRemarks. If the same class/refund/route applies to all segments, REPEAT the same values for every flight segment. Do NOT leave these fields empty for connecting flights.
 - For multiple passenger types (ADT, CHD, INF), create separate fare objects
 - Look for ALL details: baggage, class, refund policy, duration, transit info
 - Return ONLY raw JSON, NO markdown, NO explanation, NO code block
