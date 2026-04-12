@@ -25,6 +25,7 @@ import { HajjUmrahRoutes } from './app/modules/hajjUmrah/hajjUmrah.routes';
 import { HotelRoutes } from './app/modules/hotel/hotel.routes';
 import { VisaDocumentRoutes } from './app/modules/visaDocument/visaDocument.routes';
 import { PdfExtractRoutes } from './app/modules/pdfExtract/pdfExtract.routes';
+import { BookingRoutes } from './app/modules/booking/booking.routes';
 
 // ==================== App Initialization ====================
 const app: Application = express();
@@ -126,6 +127,10 @@ app.use('/api/tickets', TicketRoutes);
 // Document Entry CRUD routes (visa/travel docs)
 import { DocEntryRoutes } from './app/modules/docEntry/docEntry.routes';
 app.use('/api/doc-entries', DocEntryRoutes);
+
+// Booking routes (visa / hotel / tour / hajj / study)
+app.use('/api/bookings', BookingRoutes);
+
 
 // ==================== Error Handling ====================
 // 404 Not Found handler (must be after all routes)
