@@ -15,6 +15,7 @@ const documentRequirementSchema = z.object({
 });
 
 const visaTypeSchema = z.object({
+    categorySlug: z.string().trim().min(1, 'Visa category is required'),
     name: z.string().min(1, 'Visa type name is required'),
     nameBn: z.string().optional(),
     processingTime: z.string().optional(),

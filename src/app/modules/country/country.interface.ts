@@ -23,8 +23,9 @@ export interface IDocumentRequirement {
  * এই দেশের জন্য উপলব্ধ ভিসার ধরন
  */
 export interface IVisaType {
-    name: string;                     // e.g. "Tourist Visa"
-    nameBn?: string;                  // e.g. "ট্যুরিস্ট ভিসা"
+    categorySlug?: string;            // Reference to VisaCategory.slug e.g. "tourist-visa"
+    name: string;                     // Country-specific name e.g. "Visitor Visa (600)"
+    nameBn?: string;                  // e.g. "ভিজিটর ভিসা"
     processingTime?: string;          // e.g. "5-7 Days"
     processingTimeBn?: string;
     fee?: number;                     // Service fee in BDT

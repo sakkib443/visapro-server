@@ -22,6 +22,7 @@ const documentRequirementSchema = new Schema(
 
 const visaTypeSchema = new Schema(
     {
+        categorySlug: { type: String, trim: true, lowercase: true },
         name: { type: String, required: true },
         nameBn: { type: String },
         processingTime: { type: String },
