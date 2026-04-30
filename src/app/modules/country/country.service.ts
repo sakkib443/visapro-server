@@ -154,7 +154,7 @@ const deleteCountry = async (id: string): Promise<ICountry | null> => {
  */
 const getActiveCountries = async (): Promise<ICountry[]> => {
     const countries = await Country.find({ isActive: true })
-        .select('name nameBn slug flag region regionBn startingPrice submissionType isFeatured image')
+        .select('name nameBn slug flag region regionBn startingPrice submissionType isFeatured image visaTypes')
         .sort({ name: 1 })
         .lean();
     return countries;

@@ -26,6 +26,8 @@ import { HotelRoutes } from './app/modules/hotel/hotel.routes';
 import { VisaDocumentRoutes } from './app/modules/visaDocument/visaDocument.routes';
 import { PdfExtractRoutes } from './app/modules/pdfExtract/pdfExtract.routes';
 import { BookingRoutes } from './app/modules/booking/booking.routes';
+import { TestimonialRoutes } from './app/modules/testimonial/testimonial.routes';
+import { SettingsRoutes } from './app/modules/settings/settings.routes';
 
 // ==================== App Initialization ====================
 const app: Application = express();
@@ -130,6 +132,12 @@ app.use('/api/doc-entries', DocEntryRoutes);
 
 // Booking routes (visa / hotel / tour / hajj / study)
 app.use('/api/bookings', BookingRoutes);
+
+// Testimonial routes (user reviews on homepage)
+app.use('/api/testimonials', TestimonialRoutes);
+
+// Settings routes (site contact/social — singleton, admin-controlled)
+app.use('/api/settings', SettingsRoutes);
 
 
 // ==================== Error Handling ====================

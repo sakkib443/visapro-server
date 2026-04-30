@@ -3,3 +3,6 @@ dist
 # .env removed to allow pushing environment variables as requested
 .vercel
 .env*.local
+
+# Environment files
+.env
