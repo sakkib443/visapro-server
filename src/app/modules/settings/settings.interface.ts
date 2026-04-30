@@ -23,6 +23,22 @@ export interface ISettings extends Document {
     address: string;
     addressBn?: string;
 
+    // Working Hours
+    workingDays: string;      // e.g. "Sat - Thu: Open"
+    workingDaysBn?: string;   // e.g. "শনি - বৃহঃ: খোলা"
+    workingHours: string;     // e.g. "9:30 AM - 8:30 PM"
+    workingHoursBn?: string;  // e.g. "সকাল ৯:৩০ - রাত ৮:৩০"
+
+    // Map
+    mapEmbedUrl?: string;     // Google Maps embed URL
+    mapLabel: string;         // e.g. "PANTHPATH, DHAKA"
+    mapLabelBn?: string;      // e.g. "পান্থপথ, ঢাকা"
+
+    // Stats
+    visaSuccessRate: string;  // e.g. "98%"
+    countriesCount: string;   // e.g. "50+"
+    happyClientsCount: string; // e.g. "10K+"
+
     // Social
     social: ISocialLinks;
 

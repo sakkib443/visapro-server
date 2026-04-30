@@ -62,7 +62,6 @@ const blogSchema = new Schema<IBlog, BlogModel>(
         category: {
             type: Schema.Types.ObjectId,
             ref: 'Category',
-            required: [true, 'Category is required'],
         },
         tags: [{
             type: String,

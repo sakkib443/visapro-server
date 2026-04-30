@@ -33,7 +33,7 @@ export interface IBlog {
     videoUrl?: string;                // Embedded video URL (YouTube, etc.)
 
     // ==================== Category & Tags ====================
-    category: Types.ObjectId;         // Reference to Category
+    category?: Types.ObjectId;         // Reference to Category (optional)
     tags: string[];                   // Search tags
 
     // ==================== Author Info ====================

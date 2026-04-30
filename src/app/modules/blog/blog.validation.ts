@@ -45,13 +45,11 @@ const createBlogSchema = z.object({
             .url('Invalid thumbnail URL'),
         images: z.array(z.string().url()).optional(),
         videoUrl: z.string().url('Invalid video URL').optional().or(z.literal('')),
-        category: z.string({
-            required_error: 'Category is required',
-        }),
+        category: z.string().optional(),
         tags: z
             .array(z.string().max(50, 'Tag cannot exceed 50 characters'))
-            .min(1, 'At least one tag is required')
-            .max(10, 'Cannot have more than 10 tags'),
+            .max(10, 'Cannot have more than 10 tags')
+            .optional(),
         status: z.enum(['draft', 'published', 'archived']).default('draft'),
         isFeatured: z.boolean().default(false),
         isPopular: z.boolean().default(false),
