@@ -3,9 +3,9 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { BookingService } from './booking.service';
 
-// POST /api/bookings  → user creates booking
+// POST /api/bookings  → anyone can submit (auth optional)
 const createBooking = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user!.userId;
+    const userId = req.user?.userId || null;
     const booking = await BookingService.createBooking(userId, req.body);
     sendResponse(res, {
         statusCode: 201,

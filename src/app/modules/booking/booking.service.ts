@@ -1,9 +1,9 @@
 import { Booking } from './booking.model';
 import AppError from '../../utils/AppError';
 
-// Create a new booking
-const createBooking = async (userId: string, payload: Record<string, unknown>) => {
-    const booking = await Booking.create({ ...payload, user: userId });
+// Create a new booking (user optional for guest bookings)
+const createBooking = async (userId: string | null, payload: Record<string, unknown>) => {
+    const booking = await Booking.create({ ...payload, ...(userId && { user: userId }) });
     return booking;
 };
 

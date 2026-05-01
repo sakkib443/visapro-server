@@ -3,7 +3,7 @@ import { IBooking, BookingModel } from './booking.interface';
 
 const bookingSchema = new Schema<IBooking, BookingModel>(
     {
-        user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        user: { type: Schema.Types.ObjectId, ref: 'User' },
         type: {
             type: String,
             enum: ['visa', 'hotel', 'tour', 'hajj', 'study'],

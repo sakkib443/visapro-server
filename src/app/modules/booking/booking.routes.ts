@@ -1,11 +1,11 @@
 import express from 'express';
 import { BookingController } from './booking.controller';
-import { authMiddleware, authorizeRoles } from '../../middlewares/auth';
+import { authMiddleware, authorizeRoles, optionalAuth } from '../../middlewares/auth';
 
 const router = express.Router();
 
-// ── User: submit booking (must be logged in)
-router.post('/', authMiddleware, BookingController.createBooking);
+// ── Anyone can submit booking (auth optional for auto-fill)
+router.post('/', optionalAuth, BookingController.createBooking);
 
 // ── User: see own bookings
 router.get('/my', authMiddleware, BookingController.getMyBookings);
