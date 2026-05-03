@@ -28,6 +28,7 @@ import { PdfExtractRoutes } from './app/modules/pdfExtract/pdfExtract.routes';
 import { BookingRoutes } from './app/modules/booking/booking.routes';
 import { TestimonialRoutes } from './app/modules/testimonial/testimonial.routes';
 import { SettingsRoutes } from './app/modules/settings/settings.routes';
+import { HomeContentRoutes } from './app/modules/homeContent/homeContent.routes';
 
 // ==================== App Initialization ====================
 const app: Application = express();
@@ -138,6 +139,9 @@ app.use('/api/testimonials', TestimonialRoutes);
 
 // Settings routes (site contact/social — singleton, admin-controlled)
 app.use('/api/settings', SettingsRoutes);
+
+// Home Content routes (homepage sections — admin-controlled)
+app.use('/api/home-content', HomeContentRoutes);
 
 
 // ==================== Error Handling ====================
