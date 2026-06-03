@@ -145,17 +145,30 @@ const updateVisaCategory = async (
         throw new AppError(404, 'Visa category not found');
     }
 
-    // If name is being updated, update slug too
-    if (payload.name && payload.name !== category.name) {
-        let newSlug = generateSlug(payload.name);
+    // Whitelist only the fields a client is allowed to update.
+    // `slug` is intentionally excluded — it is server-managed and only
+    // regenerated below when the name changes.
+    const updateData: Partial<IVisaCategory> = {};
+    if (payload.name !== undefined) updateData.name = payload.name;
+    if (payload.nameBn !== undefined) updateData.nameBn = payload.nameBn;
+    if (payload.description !== undefined) updateData.description = payload.description;
+    if (payload.descriptionBn !== undefined) updateData.descriptionBn = payload.descriptionBn;
+    if (payload.icon !== undefined) updateData.icon = payload.icon;
+    if (payload.image !== undefined) updateData.image = payload.image;
+    if (payload.isActive !== undefined) updateData.isActive = payload.isActive;
+    if (payload.order !== undefined) updateData.order = payload.order;
+
+    // If name is being updated, regenerate slug too
+    if (updateData.name && updateData.name !== category.name) {
+        let newSlug = generateSlug(updateData.name);
         const existingCategory = await VisaCategory.findOne({ slug: newSlug, _id: { $ne: id } });
         if (existingCategory) {
             newSlug = `${newSlug}-${Date.now()}`;
         }
-        payload.slug = newSlug;
+        updateData.slug = newSlug;
     }
 
-    const updatedCategory = await VisaCategory.findByIdAndUpdate(id, payload, {
+    const updatedCategory = await VisaCategory.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
     });

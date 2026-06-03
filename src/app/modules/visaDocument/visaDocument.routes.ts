@@ -60,6 +60,7 @@ router.get(
 router.get(
     '/:id',
     authMiddleware,
+    authorizeRoles('admin'),
     VisaDocumentController.getVisaDocumentById
 );
 

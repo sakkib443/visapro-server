@@ -49,8 +49,15 @@ const AuthService = {
         }
 
         // Create user
+        // Whitelist only the fields a public registration is allowed to set.
+        // Never spread the raw payload to avoid mass-assignment (e.g. role, status).
         const user = await User.create({
-            ...payload,
+            email: payload.email,
+            password: payload.password,
+            firstName: payload.firstName,
+            lastName: payload.lastName,
+            phone: payload.phone,
+            role: 'user', // Public registration can only create regular users
             status: 'active', // Or 'pending' if email verification required
             isEmailVerified: false,
         });
@@ -89,38 +96,6 @@ const AuthService = {
      */
     async login(payload: TLoginInput): Promise<IAuthResponse> {
         const { email, password } = payload;
-
-        // ==================== ADMIN LOGIN FROM ENV ====================
-        // Check if login credentials match admin credentials from .env
-        const adminEmail = process.env.EMAIL;
-        const adminPassword = process.env.password;
-
-        if (adminEmail && adminPassword && email === adminEmail && password === adminPassword) {
-            // Admin login from ENV - create admin session
-            // Using a fixed valid ObjectId for superadmin
-            const superAdminId = '000000000000000000000001'; // Valid 24-char hex ObjectId
-
-            const jwtPayload: IJwtPayload = {
-                userId: superAdminId,
-                email: adminEmail,
-                role: 'admin',
-            };
-
-            const tokens = this.generateTokens(jwtPayload);
-
-            return {
-                user: {
-                    _id: superAdminId,
-                    email: adminEmail,
-                    firstName: 'Super',
-                    lastName: 'Admin',
-                    role: 'admin',
-                    avatar: '',
-                },
-                tokens,
-            };
-        }
-        // ==================== END ADMIN LOGIN FROM ENV ====================
 
         // Find user with password
         const user = await User.findByEmail(email);

@@ -4,7 +4,9 @@
 
 import express from 'express';
 import { HomeContentController } from './homeContent.controller';
+import { HomeContentValidation } from './homeContent.validation';
 import { authMiddleware, authorizeRoles } from '../../middlewares/auth';
+import validateRequest from '../../middlewares/validateRequest';
 
 const router = express.Router();
 
@@ -17,6 +19,7 @@ router.put(
     '/:section',
     authMiddleware,
     authorizeRoles('admin'),
+    validateRequest(HomeContentValidation.updateSectionSchema),
     HomeContentController.updateSection
 );
 

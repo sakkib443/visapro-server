@@ -21,6 +21,65 @@ const generateSlug = (name: string): string => {
 };
 
 /**
+ * Whitelist of Hotel fields a client is allowed to set.
+ * `slug` is derived by the service and intentionally excluded here.
+ */
+const ALLOWED_HOTEL_FIELDS: (keyof IHotel)[] = [
+    'name',
+    'nameBn',
+    'image',
+    'gallery',
+    'location',
+    'locationBn',
+    'city',
+    'cityBn',
+    'country',
+    'countryBn',
+    'starRating',
+    'hotelCategory',
+    'roomType',
+    'roomTypeBn',
+    'pricePerNight',
+    'oldPrice',
+    'currency',
+    'totalRooms',
+    'availableRooms',
+    'bookings',
+    'checkInTime',
+    'checkOutTime',
+    'amenities',
+    'amenitiesBn',
+    'description',
+    'descriptionBn',
+    'longDescription',
+    'longDescriptionBn',
+    'faqs',
+    'tags',
+    'rating',
+    'reviewsCount',
+    'metaTitle',
+    'metaDescription',
+    'status',
+    'isActive',
+    'isFeatured',
+    'order',
+];
+
+/**
+ * Build an object containing only schema-defined Hotel fields, copied from the
+ * raw payload. Prevents mass-assignment of unknown / protected fields.
+ */
+const pickHotelFields = (payload: Partial<IHotel>): Partial<IHotel> => {
+    const data: Partial<IHotel> = {};
+    for (const field of ALLOWED_HOTEL_FIELDS) {
+        if (payload[field] !== undefined) {
+            (data as Record<string, unknown>)[field] = payload[field];
+        }
+    }
+    return data;
+};
+
+/**
  * Create a new hotel
  */
 const createHotel = async (payload: Partial<IHotel>): Promise<IHotel> => {
@@ -35,7 +94,7 @@ const createHotel = async (payload: Partial<IHotel>): Promise<IHotel> => {
         counter++;
     }
 
-    const hotelData = { ...payload, slug };
+    const hotelData = { ...pickHotelFields(payload), slug };
     const hotel = await Hotel.create(hotelData);
     return hotel;
 };
@@ -128,15 +187,17 @@ const updateHotel = async (id: string, payload: Partial<IHotel>): Promise<IHotel
     const hotel = await Hotel.findById(id);
     if (!hotel) throw new AppError(404, 'Hotel not found');
 
+    const updateData = pickHotelFields(payload);
+
     // Update slug if name changed
     if (payload.name && payload.name !== hotel.name) {
         let newSlug = generateSlug(payload.name);
         const existing = await Hotel.findOne({ slug: newSlug, _id: { $ne: id } });
         if (existing) newSlug = `${newSlug}-${Date.now()}`;
-        payload.slug = newSlug;
+        updateData.slug = newSlug;
     }
 
-    const updatedHotel = await Hotel.findByIdAndUpdate(id, payload, {
+    const updatedHotel = await Hotel.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
     });

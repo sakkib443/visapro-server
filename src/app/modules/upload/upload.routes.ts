@@ -41,8 +41,8 @@ router.post('/software', authMiddleware, uploadSoftwareScreenshots);
 // ZIP/RAR file upload (for download files - admin/seller)
 router.post('/file', authMiddleware, uploadZipFile);
 
-// Delete image/file
-router.delete('/delete', authMiddleware, removeImage);
+// Delete image/file (admin only)
+router.delete('/delete', authMiddleware, authorizeRoles('admin'), removeImage);
 
 export const uploadRoutes = router;
 

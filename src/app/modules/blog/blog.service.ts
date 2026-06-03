@@ -40,8 +40,28 @@ const createBlog = async (payload: Partial<IBlog>, userId: string, userRole: str
         counter++;
     }
 
-    const blogData = {
-        ...payload,
+    // Whitelist only user-settable fields from the payload. Auto-managed stat
+    // fields (totalViews, likeCount, likedBy, commentCount, shareCount,
+    // readingTime, wordCount, publishedAt) must NOT be set from the request body.
+    const blogData: Partial<IBlog> = {
+        title: payload.title,
+        titleBn: payload.titleBn,
+        excerpt: payload.excerpt,
+        excerptBn: payload.excerptBn,
+        content: payload.content,
+        contentBn: payload.contentBn,
+        thumbnail: payload.thumbnail,
+        images: payload.images,
+        videoUrl: payload.videoUrl,
+        category: payload.category,
+        tags: payload.tags,
+        status: payload.status,
+        isFeatured: payload.isFeatured,
+        isPopular: payload.isPopular,
+        allowComments: payload.allowComments,
+        metaTitle: payload.metaTitle,
+        metaDescription: payload.metaDescription,
+        metaKeywords: payload.metaKeywords,
         slug,
         author: new Types.ObjectId(userId),
         authorRole: userRole as 'admin' | 'mentor',
@@ -242,6 +262,30 @@ const updateBlog = async (
         throw new AppError(403, 'You are not authorized to update this blog');
     }
 
+    // Whitelist only user-settable fields from the payload. Auto-managed stat
+    // fields (totalViews, likeCount, likedBy, commentCount, shareCount,
+    // readingTime, wordCount) and author/authorRole must NOT be updatable from
+    // the request body. slug and publishedAt are derived below.
+    const updateData: Partial<IBlog> = {};
+    if (payload.title !== undefined) updateData.title = payload.title;
+    if (payload.titleBn !== undefined) updateData.titleBn = payload.titleBn;
+    if (payload.excerpt !== undefined) updateData.excerpt = payload.excerpt;
+    if (payload.excerptBn !== undefined) updateData.excerptBn = payload.excerptBn;
+    if (payload.content !== undefined) updateData.content = payload.content;
+    if (payload.contentBn !== undefined) updateData.contentBn = payload.contentBn;
+    if (payload.thumbnail !== undefined) updateData.thumbnail = payload.thumbnail;
+    if (payload.images !== undefined) updateData.images = payload.images;
+    if (payload.videoUrl !== undefined) updateData.videoUrl = payload.videoUrl;
+    if (payload.category !== undefined) updateData.category = payload.category;
+    if (payload.tags !== undefined) updateData.tags = payload.tags;
+    if (payload.status !== undefined) updateData.status = payload.status;
+    if (payload.isFeatured !== undefined) updateData.isFeatured = payload.isFeatured;
+    if (payload.isPopular !== undefined) updateData.isPopular = payload.isPopular;
+    if (payload.allowComments !== undefined) updateData.allowComments = payload.allowComments;
+    if (payload.metaTitle !== undefined) updateData.metaTitle = payload.metaTitle;
+    if (payload.metaDescription !== undefined) updateData.metaDescription = payload.metaDescription;
+    if (payload.metaKeywords !== undefined) updateData.metaKeywords = payload.metaKeywords;
+
     // If title is being updated, update slug too
     if (payload.title && payload.title !== blog.title) {
         let newSlug = generateSlug(payload.title);
@@ -249,15 +293,15 @@ const updateBlog = async (
         if (existingBlog) {
             newSlug = `${newSlug}-${Date.now()}`;
         }
-        payload.slug = newSlug;
+        updateData.slug = newSlug;
     }
 
     // Set publishedAt if status is being changed to published
     if (payload.status === 'published' && blog.status !== 'published') {
-        payload.publishedAt = new Date();
+        updateData.publishedAt = new Date();
     }
 
-    const updatedBlog = await Blog.findByIdAndUpdate(id, payload, {
+    const updatedBlog = await Blog.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
     }).populate('category', 'name nameEn icon').populate('author', 'firstName lastName avatar');

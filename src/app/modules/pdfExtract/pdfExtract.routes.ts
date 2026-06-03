@@ -7,6 +7,7 @@ import express from 'express';
 import multer from 'multer';
 import pdfParse from 'pdf-parse';
 import Groq from 'groq-sdk';
+import { authMiddleware, authorizeRoles } from '../../middlewares/auth';
 
 const router = express.Router();
 
@@ -95,8 +96,8 @@ RULES:
 - If a field is not found, use empty string ""`;
 
 
-// POST /api/pdf-extract
-router.post('/', upload.single('pdf'), async (req: any, res: any) => {
+// POST /api/pdf-extract (admin only)
+router.post('/', authMiddleware, authorizeRoles('admin'), upload.single('pdf'), async (req: any, res: any) => {
     try {
         const file = req.file;
         if (!file) {

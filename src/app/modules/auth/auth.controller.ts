@@ -101,17 +101,17 @@ const AuthController = {
    */
   forgotPassword: catchAsync(async (req: Request, res: Response) => {
     const { email } = req.body;
-    const resetToken = await AuthService.forgotPassword(email);
 
-    // In production, send email instead of returning token
-    // Reset URL example: ${config.frontend_url}/reset-password?token=${resetToken}
+    // The reset token must be delivered to the user via email only.
+    // It is NEVER returned in the HTTP response, otherwise any unauthenticated
+    // caller who knows a victim's email could obtain the token and take over
+    // the account.
+    await AuthService.forgotPassword(email);
 
     sendResponse(res, {
       statusCode: 200,
       success: true,
       message: 'Password reset link sent to your email',
-      // Remove this in production - only for testing
-      data: config.env === 'development' ? { resetToken } : undefined,
     });
   }),
 

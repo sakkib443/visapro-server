@@ -92,7 +92,18 @@ const updateTestimonial = async (
     id: string,
     payload: Partial<ITestimonial>
 ): Promise<ITestimonial> => {
-    const testimonial = await Testimonial.findByIdAndUpdate(id, payload, {
+    // Whitelist only the fields an admin is allowed to update.
+    // Never pass raw payload through to prevent mass-assignment
+    // (e.g. overwriting user, name, avatar, createdAt).
+    const updateData: Partial<ITestimonial> = {};
+    if (payload.rating !== undefined) updateData.rating = payload.rating;
+    if (payload.message !== undefined) updateData.message = payload.message;
+    if (payload.role !== undefined) updateData.role = payload.role;
+    if (payload.status !== undefined) updateData.status = payload.status;
+    if (payload.isFeatured !== undefined)
+        updateData.isFeatured = payload.isFeatured;
+
+    const testimonial = await Testimonial.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
     });

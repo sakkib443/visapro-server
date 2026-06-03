@@ -8,6 +8,7 @@ import UserController from './user.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { authMiddleware, authorizeRoles } from '../../middlewares/auth';
 import {
+    createUserValidation,
     updateUserValidation,
     changePasswordValidation,
     adminUpdateUserValidation,
@@ -76,6 +77,7 @@ router.post(
     '/admin/create',
     authMiddleware,
     authorizeRoles('admin'),
+    validateRequest(createUserValidation),
     UserController.createUser
 );
 

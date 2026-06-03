@@ -153,6 +153,81 @@ const DEFAULTS: Record<SectionName, any> = {
     },
 };
 
+// ─── Field whitelists (per section) ───────────────────────────────────
+// The `data` field is Schema.Types.Mixed, so Mongoose performs no shape
+// validation. To prevent mass-assignment of arbitrary properties from the
+// raw request body, we copy ONLY the fields defined in each section's schema.
+
+const SERVICE_ITEM_FIELDS = [
+    'title', 'subtitle', 'description', 'icon', 'image', 'color', 'stats', 'href', 'order', 'isActive',
+] as const;
+
+const PARTNER_ITEM_FIELDS = ['name', 'icon', 'color', 'order'] as const;
+
+const WHY_CHOOSE_CARD_FIELDS = ['title', 'description', 'icon', 'color', 'order'] as const;
+
+const STAT_ITEM_FIELDS = ['value', 'label', 'color', 'order'] as const;
+
+const SECTION_FIELDS: Record<SectionName, readonly string[]> = {
+    hero: [
+        'badgeText', 'heading', 'ctaButton1Text', 'ctaButton1Link',
+        'ctaButton2Text', 'ctaButton2Link', 'videoUrl', 'isActive',
+    ],
+    services: [
+        'tagText', 'heading', 'headingHighlight', 'description', 'items',
+        'bottomCTAText', 'bottomCTALink', 'isActive',
+    ],
+    partners: ['items', 'isActive'],
+    consultation: [
+        'tagText', 'heading', 'headingHighlight', 'headingEnd', 'description',
+        'experienceTitle', 'experienceDesc', 'experienceImage', 'mainImage1',
+        'mainImage2', 'ctaText', 'ctaLink', 'agentCount', 'agentLabel', 'isActive',
+    ],
+    whyChooseUs: [
+        'tagText', 'heading', 'headingHighlight', 'description', 'cards', 'stats', 'isActive',
+    ],
+};
+
+// Pick only the allowed keys from a plain object.
+const pickFields = (input: any, allowed: readonly string[]): Record<string, any> => {
+    const out: Record<string, any> = {};
+    if (!input || typeof input !== 'object') return out;
+    for (const key of allowed) {
+        if (input[key] !== undefined) {
+            out[key] = input[key];
+        }
+    }
+    return out;
+};
+
+// Sanitize each item of an array against the allowed item fields.
+const pickItems = (value: any, allowed: readonly string[]): Record<string, any>[] => {
+    if (!Array.isArray(value)) return [];
+    return value.map((item) => pickFields(item, allowed));
+};
+
+/**
+ * Build an explicit, whitelisted data object for a section. Only fields
+ * defined in that section's schema are copied from the raw input; nested
+ * array items are likewise restricted to their own allowed fields.
+ */
+const sanitizeSectionData = (section: SectionName, input: any): Record<string, any> => {
+    const data = pickFields(input, SECTION_FIELDS[section]);
+
+    if (section === 'services' && data.items !== undefined) {
+        data.items = pickItems(data.items, SERVICE_ITEM_FIELDS);
+    }
+    if (section === 'partners' && data.items !== undefined) {
+        data.items = pickItems(data.items, PARTNER_ITEM_FIELDS);
+    }
+    if (section === 'whyChooseUs') {
+        if (data.cards !== undefined) data.cards = pickItems(data.cards, WHY_CHOOSE_CARD_FIELDS);
+        if (data.stats !== undefined) data.stats = pickItems(data.stats, STAT_ITEM_FIELDS);
+    }
+
+    return data;
+};
+
 // ─── Get all sections ─────────────────────────────────────────────────
 const getAllSections = async (): Promise<IHomeContent[]> => {
     let docs = await HomeContent.find().lean();
@@ -184,14 +259,17 @@ const getSection = async (section: SectionName): Promise<IHomeContent> => {
 // ─── Update section ───────────────────────────────────────────────────
 const updateSection = async (
     section: SectionName,
-    data: any
+    input: any
 ): Promise<IHomeContent> => {
+    // Whitelist: only fields defined in this section's schema are persisted.
+    const data = sanitizeSectionData(section, input);
+
     let doc = await HomeContent.findOne({ section });
     if (!doc) {
         doc = await HomeContent.create({ section, data });
         return doc;
     }
-    doc.data = data;
+    doc.data = data as IHomeContent['data'];
     doc.markModified('data');
     await doc.save();
     return doc;

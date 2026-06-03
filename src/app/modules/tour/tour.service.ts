@@ -131,15 +131,38 @@ const updateTour = async (
     const tour = await Tour.findById(id);
     if (!tour) throw new AppError(404, 'Tour not found');
 
-    // Update slug if title changed
+    // Whitelist: only client-updatable fields may be set here.
+    // The unique `slug` is computed server-side (see below) and fields like
+    // `_id`/`createdAt`/`updatedAt` must NEVER be assignable from the request body.
+    const allowedFields: (keyof ITour)[] = [
+        'title', 'titleBn', 'image', 'gallery',
+        'destination', 'destinationBn', 'category', 'tourType', 'tourTypeBn',
+        'duration', 'durationBn', 'departureDate', 'departureDates',
+        'price', 'oldPrice', 'currency',
+        'groupSize', 'bookings', 'minAge', 'maxAge',
+        'description', 'descriptionBn', 'longDescription', 'longDescriptionBn',
+        'itinerary', 'includes', 'includesBn', 'excludes', 'excludesBn',
+        'faqs', 'tags', 'rating', 'reviewsCount',
+        'metaTitle', 'metaDescription',
+        'status', 'isActive', 'isFeatured', 'order',
+    ];
+
+    const updateData: Partial<ITour> = {};
+    for (const field of allowedFields) {
+        if (payload[field] !== undefined) {
+            (updateData as Record<string, unknown>)[field] = payload[field];
+        }
+    }
+
+    // Update slug if title changed (server-computed, never taken from client)
     if (payload.title && payload.title !== tour.title) {
         let newSlug = generateSlug(payload.title);
         const existing = await Tour.findOne({ slug: newSlug, _id: { $ne: id } });
         if (existing) newSlug = `${newSlug}-${Date.now()}`;
-        payload.slug = newSlug;
+        updateData.slug = newSlug;
     }
 
-    const updatedTour = await Tour.findByIdAndUpdate(id, payload, {
+    const updatedTour = await Tour.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
     });

@@ -6,3 +6,5 @@ dist
 
 # Environment files
 .env
+
+dev_server.log

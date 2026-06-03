@@ -6,9 +6,25 @@ import { User } from '../user/user.model';
 import AppError from '../../utils/AppError';
 import EmailService from '../email/email.service';
 import express from 'express';
+import { z } from 'zod';
 import { authMiddleware } from '../../middlewares/auth';
+import validateRequest from '../../middlewares/validateRequest';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
+
+/**
+ * Verify 2FA Validation Schema
+ * Ensures a 6-digit numeric OTP is provided before verification
+ */
+export const verifyTwoFactorValidation = z.object({
+    body: z.object({
+        otp: z
+            .string({
+                required_error: 'OTP is required',
+            })
+            .regex(/^\d{6}$/, 'OTP must be a 6-digit code'),
+    }),
+});
 
 // Generate 6-digit OTP
 const generateOTP = (): string => {
@@ -79,7 +95,7 @@ router.post('/enable', authMiddleware, catchAsync(async (req, res) => {
     sendResponse(res, { statusCode: 200, success: true, message: result.message, data: null });
 }));
 
-router.post('/verify', authMiddleware, catchAsync(async (req, res) => {
+router.post('/verify', authMiddleware, validateRequest(verifyTwoFactorValidation), catchAsync(async (req, res) => {
     const { otp } = req.body;
     const result = await TwoFactorService.verifyTwoFactor(req.user!.userId, otp);
     sendResponse(res, { statusCode: 200, success: true, message: result.message, data: null });

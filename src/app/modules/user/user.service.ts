@@ -158,9 +158,36 @@ const UserService = {
    * User নিজে নিজের profile update করবে
    */
   async updateProfile(userId: string, payload: TUpdateUserInput): Promise<IUser> {
+    // Whitelist: only self-editable profile fields can be updated here.
+    // Privileged fields (role, status, isEmailVerified, isDeleted, stats, etc.)
+    // must NEVER be set through this self-update route.
+    const allowedFields: (keyof TUpdateUserInput)[] = [
+      'firstName',
+      'lastName',
+      'phone',
+      'avatar',
+      'coverImage',
+      'bio',
+      'address',
+      'city',
+      'country',
+      'website',
+      'company',
+      'jobTitle',
+      'gender',
+      'socialLinks',
+    ];
+
+    const updateData: Partial<TUpdateUserInput> = {};
+    for (const field of allowedFields) {
+      if (payload[field] !== undefined) {
+        (updateData as Record<string, unknown>)[field] = payload[field];
+      }
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
-      { $set: payload },
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 
@@ -180,9 +207,27 @@ const UserService = {
     userId: string,
     payload: Partial<IUser>
   ): Promise<IUser> {
+    // Whitelist: admin may only change these specific fields.
+    // Prevents arbitrary mass-assignment (e.g. password, stats, isDeleted)
+    // from the raw request body.
+    const allowedFields: (keyof IUser)[] = [
+      'firstName',
+      'lastName',
+      'role',
+      'status',
+      'isEmailVerified',
+    ];
+
+    const updateData: Partial<IUser> = {};
+    for (const field of allowedFields) {
+      if (payload[field] !== undefined) {
+        (updateData as Record<string, unknown>)[field] = payload[field];
+      }
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
-      { $set: payload },
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 

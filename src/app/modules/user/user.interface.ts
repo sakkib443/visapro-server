@@ -113,7 +113,7 @@ export interface IUser {
   company?: string;       // Company/organization name
   jobTitle?: string;      // Job designation
   dateOfBirth?: Date;     // Birth date
-  gender?: 'male' | 'female' | 'other';
+  gender?: 'male' | 'female' | 'other' | '';
 
   // Social media links
   socialLinks?: {

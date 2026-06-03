@@ -3,7 +3,19 @@ import AppError from '../../utils/AppError';
 
 // Create a new booking (user optional for guest bookings)
 const createBooking = async (userId: string | null, payload: Record<string, unknown>) => {
-    const booking = await Booking.create({ ...payload, ...(userId && { user: userId }) });
+    // Whitelist: only guest-writable schema fields are accepted.
+    // status / adminNote / user are NOT settable from the request body.
+    const data: Record<string, unknown> = {
+        type: payload.type,
+        serviceName: payload.serviceName,
+        serviceId: payload.serviceId,
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        details: payload.details,
+        ...(userId && { user: userId }),
+    };
+    const booking = await Booking.create(data);
     return booking;
 };
 
@@ -34,7 +46,7 @@ const updateBookingStatus = async (
     const booking = await Booking.findByIdAndUpdate(
         id,
         { status, ...(adminNote && { adminNote }) },
-        { new: true }
+        { new: true, runValidators: true }
     );
     if (!booking) throw new AppError(404, 'Booking not found');
     return booking;

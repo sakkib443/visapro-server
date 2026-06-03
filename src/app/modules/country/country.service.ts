@@ -14,10 +14,55 @@ import AppError from '../../utils/AppError';
 const generateSlug = (name: string): string => {
     return name
         .toLowerCase()
+        .trim()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
-        .trim();
+        .replace(/^-+|-+$/g, '');
+};
+
+/**
+ * Allowed Country fields that may be set from request input.
+ * Whitelist mirrors the Country schema (slug is derived, not user-supplied)
+ * to prevent mass-assignment of arbitrary fields.
+ */
+const ALLOWED_COUNTRY_FIELDS: (keyof ICountry)[] = [
+    'name',
+    'nameBn',
+    'flag',
+    'image',
+    'region',
+    'regionBn',
+    'capital',
+    'capitalBn',
+    'currency',
+    'timezone',
+    'touristsPerYear',
+    'description',
+    'descriptionBn',
+    'visaTypes',
+    'documentRequirements',
+    'embassyInfo',
+    'startingPrice',
+    'submissionType',
+    'metaTitle',
+    'metaDescription',
+    'isActive',
+    'isFeatured',
+    'order',
+];
+
+/**
+ * Pick only the allowed Country fields from an input payload.
+ */
+const pickCountryFields = (payload: Partial<ICountry>): Partial<ICountry> => {
+    const data: Partial<ICountry> = {};
+    for (const key of ALLOWED_COUNTRY_FIELDS) {
+        if (payload[key] !== undefined) {
+            (data as Record<string, unknown>)[key] = payload[key];
+        }
+    }
+    return data;
 };
 
 /**
@@ -35,7 +80,7 @@ const createCountry = async (payload: Partial<ICountry>): Promise<ICountry> => {
         counter++;
     }
 
-    const countryData = { ...payload, slug };
+    const countryData = { ...pickCountryFields(payload), slug };
     const country = await Country.create(countryData);
     return country;
 };
@@ -124,14 +169,16 @@ const updateCountry = async (
     const country = await Country.findById(id);
     if (!country) throw new AppError(404, 'Country not found');
 
+    const updateData: Partial<ICountry> = pickCountryFields(payload);
+
     if (payload.name && payload.name !== country.name) {
         let newSlug = generateSlug(payload.name);
         const existing = await Country.findOne({ slug: newSlug, _id: { $ne: id } });
         if (existing) newSlug = `${newSlug}-${Date.now()}`;
-        payload.slug = newSlug;
+        updateData.slug = newSlug;
     }
 
-    const updatedCountry = await Country.findByIdAndUpdate(id, payload, {
+    const updatedCountry = await Country.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
     });

@@ -28,8 +28,7 @@ const createStorage = (folder: string) => {
                 'jpeg': 'jpg',
                 'png': 'png',
                 'gif': 'gif',
-                'webp': 'webp',
-                'svg': 'svg'
+                'webp': 'webp'
             };
             const format = formatMap[ext] || 'auto';
 
@@ -66,13 +65,12 @@ const imageFileFilter = (req: any, file: Express.Multer.File, cb: any) => {
         'image/jpg',
         'image/png',
         'image/gif',
-        'image/webp',
-        'image/svg+xml'
+        'image/webp'
     ];
     if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error(`Invalid file type. Only JPG, PNG, GIF, WEBP, SVG are allowed. Got: ${file.mimetype}`));
+        cb(new Error(`Invalid file type. Only JPG, PNG, GIF, WEBP are allowed. Got: ${file.mimetype}`));
     }
 };
 

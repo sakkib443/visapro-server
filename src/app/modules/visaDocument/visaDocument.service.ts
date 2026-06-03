@@ -9,11 +9,46 @@ import { IVisaDocument, IVisaDocumentFilters } from './visaDocument.interface';
 import AppError from '../../utils/AppError';
 
 /**
+ * Allowed VisaDocument fields that may be set from request input.
+ * Whitelist mirrors the VisaDocument schema (createdBy is set server-side,
+ * not user-supplied) to prevent mass-assignment of arbitrary fields.
+ */
+const ALLOWED_VISA_DOCUMENT_FIELDS: (keyof IVisaDocument)[] = [
+    'user',
+    'applicantName',
+    'applicantNameBn',
+    'phone',
+    'passportNo',
+    'visaType',
+    'country',
+    'visaNo',
+    'issueDate',
+    'expiryDate',
+    'entryType',
+    'images',
+    'notes',
+    'status',
+];
+
+/**
+ * Pick only the allowed VisaDocument fields from an input payload.
+ */
+const pickVisaDocumentFields = (payload: Partial<IVisaDocument>): Partial<IVisaDocument> => {
+    const data: Partial<IVisaDocument> = {};
+    for (const key of ALLOWED_VISA_DOCUMENT_FIELDS) {
+        if (payload[key] !== undefined) {
+            (data as Record<string, unknown>)[key] = payload[key];
+        }
+    }
+    return data;
+};
+
+/**
  * Create a new visa document (admin only)
  */
 const createVisaDocument = async (payload: Partial<IVisaDocument>, adminId: string): Promise<IVisaDocument> => {
     const data = {
-        ...payload,
+        ...pickVisaDocumentFields(payload),
         createdBy: new Types.ObjectId(adminId),
     };
     const doc = await VisaDocument.create(data);
@@ -112,7 +147,9 @@ const updateVisaDocument = async (id: string, payload: Partial<IVisaDocument>): 
     const doc = await VisaDocument.findById(id);
     if (!doc) throw new AppError(404, 'Visa document not found');
 
-    const updated = await VisaDocument.findByIdAndUpdate(id, payload, {
+    const updateData = pickVisaDocumentFields(payload);
+
+    const updated = await VisaDocument.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
     })

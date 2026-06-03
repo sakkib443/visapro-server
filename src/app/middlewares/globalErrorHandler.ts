@@ -5,7 +5,6 @@
 
 import { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
-import config from '../config';
 import AppError from '../utils/AppError';
 
 /**
@@ -131,12 +130,17 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   }
 
   // ==================== Send Error Response ====================
+  // Only expose stack traces when NODE_ENV is EXPLICITLY set to 'development'.
+  // config.env defaults to 'development' when NODE_ENV is unset, so relying on it
+  // would leak internal file paths in production. Check the raw env var instead.
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   res.status(statusCode).json({
     success: false,
     message,
     errorMessages,
-    // Development mode এ stack trace দেখাবে
-    stack: config.env === 'development' ? err.stack : undefined,
+    // Development mode এ stack trace দেখাবে (NODE_ENV explicitly 'development' হলে)
+    stack: isDevelopment ? err.stack : undefined,
   });
 };
 

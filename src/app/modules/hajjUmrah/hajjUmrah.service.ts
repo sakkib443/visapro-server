@@ -11,12 +11,36 @@ const generateSlug = (name: string): string => {
         .trim();
 };
 
+// Whitelist: only these schema-defined fields may be set from the request body.
+// `slug` is generated server-side; `_id`/timestamps are managed by Mongoose.
+// This prevents arbitrary mass-assignment from the raw client payload.
+const ALLOWED_FIELDS: (keyof IHajjUmrah)[] = [
+    'name', 'nameBn', 'type', 'subtitle', 'subtitleBn', 'image',
+    'duration', 'durationBn', 'price', 'oldPrice', 'currency', 'groupSize',
+    'bookings', 'departureDate', 'departureDates', 'hotel', 'hotelBn',
+    'distance', 'distanceBn', 'meals', 'mealsBn', 'description', 'descriptionBn',
+    'longDescription', 'longDescriptionBn', 'features', 'featuresBn', 'excludes',
+    'excludesBn', 'tags', 'isPopular', 'status', 'isActive', 'isFeatured',
+    'order', 'metaTitle', 'metaDescription',
+];
+
+const pickAllowedFields = (payload: Partial<IHajjUmrah>): Partial<IHajjUmrah> => {
+    const data: Partial<IHajjUmrah> = {};
+    for (const field of ALLOWED_FIELDS) {
+        if (payload[field] !== undefined) {
+            (data as Record<string, unknown>)[field] = payload[field];
+        }
+    }
+    return data;
+};
+
 const createPackage = async (payload: IHajjUmrah): Promise<IHajjUmrah> => {
-    let slug = generateSlug(payload.name);
+    const data = pickAllowedFields(payload) as IHajjUmrah;
+    let slug = generateSlug(data.name);
     const existing = await HajjUmrah.findOne({ slug });
     if (existing) slug = `${slug}-${Date.now()}`;
-    payload.slug = slug;
-    return await HajjUmrah.create(payload);
+    data.slug = slug;
+    return await HajjUmrah.create(data);
 };
 
 const getAllPackages = async (filters: IHajjUmrahFilters, page = 1, limit = 200) => {
@@ -54,8 +78,9 @@ const getPackageBySlug = async (slug: string): Promise<IHajjUmrah> => {
 };
 
 const updatePackage = async (id: string, payload: Partial<IHajjUmrah>): Promise<IHajjUmrah> => {
-    if (payload.name) payload.slug = generateSlug(payload.name);
-    const pkg = await HajjUmrah.findByIdAndUpdate(id, payload, { new: true, runValidators: true }).lean();
+    const data = pickAllowedFields(payload);
+    if (data.name) data.slug = generateSlug(data.name);
+    const pkg = await HajjUmrah.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
     if (!pkg) throw new AppError(404, 'Package not found');
     return pkg;
 };

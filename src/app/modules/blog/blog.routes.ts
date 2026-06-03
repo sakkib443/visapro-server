@@ -5,12 +5,22 @@
 // ===================================================================
 
 import express from 'express';
+import { z } from 'zod';
 import { BlogController } from './blog.controller';
 import { BlogValidation } from './blog.validation';
 import { authMiddleware, authorizeRoles, optionalAuth } from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 
 const router = express.Router();
+
+// Validates that the :id route param is a well-formed Mongo ObjectId
+const blogIdParamSchema = z.object({
+    params: z.object({
+        id: z
+            .string({ required_error: 'Blog ID is required' })
+            .regex(/^[0-9a-fA-F]{24}$/, 'Invalid blog ID'),
+    }),
+});
 
 // ==================== Public Routes ====================
 // এই routes সবার জন্য accessible
@@ -84,6 +94,8 @@ router.post(
 // Increment share count
 router.post(
     '/:id/share',
+    authMiddleware,
+    validateRequest(blogIdParamSchema),
     BlogController.incrementShareCount
 );
 
@@ -102,14 +114,14 @@ router.delete(
     BlogController.deleteComment
 );
 
-// ==================== Admin & Mentor Routes ====================
-// Admin ও Mentor এই routes access করতে পারবে
+// ==================== Admin Routes ====================
+// শুধু Admin এই routes access করতে পারবে
 
 // Create new blog
 router.post(
     '/',
     authMiddleware,
-    authorizeRoles('admin', 'mentor'),
+    authorizeRoles('admin'),
     validateRequest(BlogValidation.createBlogSchema),
     BlogController.createBlog
 );
@@ -118,7 +130,7 @@ router.post(
 router.patch(
     '/:id',
     authMiddleware,
-    authorizeRoles('admin', 'mentor'),
+    authorizeRoles('admin'),
     validateRequest(BlogValidation.updateBlogSchema),
     BlogController.updateBlog
 );
@@ -127,7 +139,7 @@ router.patch(
 router.delete(
     '/:id',
     authMiddleware,
-    authorizeRoles('admin', 'mentor'),
+    authorizeRoles('admin'),
     BlogController.deleteBlog
 );
 

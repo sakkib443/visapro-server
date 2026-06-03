@@ -8,7 +8,10 @@ import jwt from 'jsonwebtoken';
 const loginUser = async (payload: { email: string; password: string }) => {
   const { email, password } = payload;
 
-  const user = await User.findOne({ email, isDeleted: false });
+  // Password field is select:false in the schema, so it must be explicitly
+  // selected here — otherwise user.password is undefined and bcrypt.compare
+  // would always fail.
+  const user = await User.findOne({ email, isDeleted: false }).select('+password');
   if (!user || user.status !== 'active') {
     throw new Error('User not found or not active');
   }
