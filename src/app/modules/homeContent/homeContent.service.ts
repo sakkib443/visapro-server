@@ -230,10 +230,10 @@ const sanitizeSectionData = (section: SectionName, input: any): Record<string, a
 
 // ─── Get all sections ─────────────────────────────────────────────────
 const getAllSections = async (): Promise<IHomeContent[]> => {
-    let docs = await HomeContent.find().lean();
+    let docs = await HomeContent.find().lean<IHomeContent[]>();
 
     // Auto-seed missing sections
-    const existing = new Set(docs.map((d: any) => d.section));
+    const existing = new Set(docs.map((d) => d.section));
     const missing = (Object.keys(DEFAULTS) as SectionName[]).filter(
         (s) => !existing.has(s)
     );
@@ -241,10 +241,10 @@ const getAllSections = async (): Promise<IHomeContent[]> => {
     if (missing.length > 0) {
         const toInsert = missing.map((s) => ({ section: s, data: DEFAULTS[s] }));
         await HomeContent.insertMany(toInsert);
-        docs = await HomeContent.find().lean();
+        docs = await HomeContent.find().lean<IHomeContent[]>();
     }
 
-    return docs as IHomeContent[];
+    return docs;
 };
 
 // ─── Get single section ───────────────────────────────────────────────
@@ -284,7 +284,7 @@ const seedDefaults = async (): Promise<IHomeContent[]> => {
             await HomeContent.create({ section, data: DEFAULTS[section] });
         }
     }
-    return HomeContent.find().lean() as unknown as IHomeContent[];
+    return HomeContent.find().lean<IHomeContent[]>();
 };
 
 export const HomeContentService = {

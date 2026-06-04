@@ -291,6 +291,11 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
     passwordResetExpires: Date,
     passwordChangedAt: Date,
 
+    // ==================== Two-Factor Authentication ====================
+    twoFactorEnabled: { type: Boolean, default: false },
+    twoFactorSecret: { type: String },
+    twoFactorExpiry: { type: Date },
+
     // ==================== Activity ====================
     lastLoginAt: Date,
   },
@@ -298,7 +303,10 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
     timestamps: true, // createdAt, updatedAt auto add হবে
     toJSON: {
       virtuals: true,
-      transform: function (doc, ret) {
+      // `ret` is a plain serializable object here; type it loosely so the
+      // sensitive fields below can be deleted (strict mode forbids `delete`
+      // on required properties of the typed document).
+      transform: function (_doc, ret: Record<string, unknown>) {
         delete ret.password; // JSON এ password থাকবে না
         delete ret.__v;
         return ret;

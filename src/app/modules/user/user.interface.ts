@@ -151,6 +151,11 @@ export interface IUser {
   passwordResetExpires?: Date;
   passwordChangedAt?: Date;
 
+  // Two-Factor Authentication (OTP based)
+  twoFactorEnabled?: boolean;
+  twoFactorSecret?: string;
+  twoFactorExpiry?: Date;
+
   // Timestamps
   lastLoginAt?: Date;
   createdAt?: Date;
