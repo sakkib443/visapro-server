@@ -29,6 +29,10 @@ import { BookingRoutes } from './app/modules/booking/booking.routes';
 import { TestimonialRoutes } from './app/modules/testimonial/testimonial.routes';
 import { SettingsRoutes } from './app/modules/settings/settings.routes';
 import { HomeContentRoutes } from './app/modules/homeContent/homeContent.routes';
+import { StudyAbroadRoutes } from './app/modules/studyAbroad/studyAbroad.routes';
+import { VisaApplicationRoutes } from './app/modules/visaApplication/visaApplication.routes';
+import { AirTicketRoutes } from './app/modules/airTicket/airTicket.routes';
+import { MessageRoutes } from './app/modules/message/message.routes';
 
 // ==================== App Initialization ====================
 const app: Application = express();
@@ -142,6 +146,18 @@ app.use('/api/settings', SettingsRoutes);
 
 // Home Content routes (homepage sections — admin-controlled)
 app.use('/api/home-content', HomeContentRoutes);
+
+// Study Abroad routes (programs — public read, admin-managed)
+app.use('/api/study-abroad', StudyAbroadRoutes);
+
+// Visa Application routes (internal CRM records — admin-only)
+app.use('/api/visa-applications', VisaApplicationRoutes);
+
+// Air Ticket routes (flight booking records — admin-only)
+app.use('/api/air-tickets', AirTicketRoutes);
+
+// Message routes (contact inbox — public create, admin-managed)
+app.use('/api/messages', MessageRoutes);
 
 
 // ==================== Error Handling ====================
